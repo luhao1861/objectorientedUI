@@ -134,7 +134,6 @@ export default {
       this.$refs[formName].resetFields()
     },
     signUp () {
-      alert(this.signUpForm.username)
       this.$axios.post('/sys/user/signup', this.signUpForm, {
         params: {
           username: this.signUpForm.username,

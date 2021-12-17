@@ -15,16 +15,16 @@ export default ({
     }]
   },
   mutations: {
-    setMenuList(state, menu) {
+    setMenuList (state, menu) {
       state.menuList = menu
     },
-    setPermList(state, perm) {
+    setPermList (state, perm) {
       state.permList = perm
     },
-    changeRouteStatus(state, loadRoutes) {
+    changeRouteStatus (state, loadRoutes) {
       state.loadRoutes = loadRoutes
     },
-    addTab(state, tab) {
+    addTab (state, tab) {
       const index = state.editableTabs.findIndex(e => e.name === tab.name)
       if (index === -1) {
         state.editableTabs.push({
