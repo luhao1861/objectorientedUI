@@ -8,6 +8,7 @@
       <el-tree
         class="filter-tree"
         :data="data"
+        @node-click="handleNodeClick"
         :props="defaultProps"
         default-expand-all
         :filter-node-method="filterNode"
@@ -20,19 +21,18 @@
         <el-form :inline="true">
           <el-form-item>
             <el-input
-              v-model="searchForm.name"
-              placeholder="name"
-              clearable
-            >
+              v-model="searchForm.bookName"
+              placeholder="Book Name"
+              clearable>
             </el-input>
           </el-form-item>
 
           <el-form-item>
-            <el-button @click="getRoleList">Search</el-button>
+            <el-button @click="getBookshelfList('serach')">Search</el-button>
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="dialogVisible = true">Insert</el-button>
+            <el-button type="primary" @click="clickInsertButton()">Insert</el-button>
           </el-form-item>
           <el-form-item>
             <el-popconfirm title="Do you confirm this multiple deletion?" @confirm="delHandle(null)">
@@ -56,38 +56,41 @@
           </el-table-column>
 
           <el-table-column
-            prop="name"
-            label="name"
-            width="120">
+            prop="bookName"
+            label="Book Name"
+            width="130">
           </el-table-column>
           <el-table-column
-            prop="code"
-            label="code"
+            prop="bookPages"
+            label="Book Pages"
             show-overflow-tooltip>
           </el-table-column>
           <el-table-column
-            prop="remark"
-            label="remark"
+            prop="bookAuthor"
+            label="Book Author"
+            show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column
+            prop="bookPrice"
+            label="Book Price"
+            show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column
+            prop="bookPublisher"
+            label="Book Publisher"
+            show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column
+            prop="bookshelf.bookshelfCode"
+            label="Bookshelf Code"
             show-overflow-tooltip>
           </el-table-column>
 
-          <el-table-column
-            prop="status"
-            label="status">
-            <template slot-scope="scope">
-              <el-tag size="small" v-if="scope.row.status === 1" type="success">正常</el-tag>
-              <el-tag size="small" v-else-if="scope.row.status === 0" type="danger">禁用</el-tag>
-            </template>
-
-          </el-table-column>
           <el-table-column
             prop="icon"
             label="Operation">
 
             <template slot-scope="scope">
-              <el-button type="text" @click="permHandle(scope.row.id)">Role</el-button>
-              <el-divider direction="vertical"></el-divider>
-
               <el-button type="text" @click="editHandle(scope.row.id)">Edit</el-button>
               <el-divider direction="vertical"></el-divider>
 
@@ -120,52 +123,43 @@
 
           <el-form :model="editForm" :rules="editFormRules" ref="editForm" label-width="100px" class="demo-editForm">
 
-            <el-form-item label="name" prop="name" label-width="100px">
-              <el-input v-model="editForm.name" autocomplete="off"></el-input>
+            <el-form-item label="Name" prop="bookName" label-width="100px">
+              <el-input v-model="editForm.bookName" autocomplete="off" style="width: 400px"></el-input>
             </el-form-item>
 
-            <el-form-item label="code" prop="code" label-width="100px">
-              <el-input v-model="editForm.code" autocomplete="off"></el-input>
+            <el-form-item label="Pages" prop="bookPages" label-width="100px">
+              <el-input v-model.number="editForm.bookPages" autocomplete="off" style="width: 400px"></el-input>
             </el-form-item>
 
-            <el-form-item label="remark" prop="remark" label-width="100px">
-              <el-input v-model="editForm.remark" autocomplete="off"></el-input>
+            <el-form-item label="Author" prop="bookAuthor" label-width="100px">
+              <el-input v-model="editForm.bookAuthor" autocomplete="off" style="width: 400px"></el-input>
             </el-form-item>
 
-            <el-form-item label="status" prop="status" label-width="100px">
-              <el-radio-group v-model="editForm.status">
-                <el-radio :label=0>Disable</el-radio>
-                <el-radio :label=1>Enable</el-radio>
-              </el-radio-group>
+            <el-form-item label="Price" prop="bookPrice" label-width="100px">
+              <el-input v-model.number="editForm.bookPrice" autocomplete="off" style="width: 400px"></el-input>
+            </el-form-item>
+
+            <el-form-item label="Publisher" prop="bookPublisher" label-width="100px">
+              <el-input v-model="editForm.bookPublisher" autocomplete="off" style="width: 400px"></el-input>
+            </el-form-item>
+
+            <el-form-item label="Bookshelf" prop="bookshelf" label-width="100px">
+              <el-select v-model="value" placeholder="please select a Bookshelf where it belongs to" style="width: 400px">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
 
             <el-form-item>
               <el-button type="primary" @click="submitForm('editForm')">Confirm</el-button>
-              <el-button @click="resetForm('editForm')">Reset</el-button>
+              <el-button @click="resetForm('editForm')">Close</el-button>
             </el-form-item>
           </el-form>
         </el-dialog>
-        <el-dialog
-          title="Set Role"
-          :visible.sync="permDialogVisible"
-          width="600px">
-          <el-form :model="permForm">
-            <el-tree
-              :data="permTreeData"
-              show-checkbox
-              ref="permTree"
-              :default-expand-all=true
-              node-key="id"
-              :check-strictly=true
-              :props="defaultProps">
-            </el-tree>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-        <el-button @click="permDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="submitPermFormHandle('permForm')">Confirm</el-button>
-      </span>
-        </el-dialog>
-
       </div>
     </el-col>
   </el-row>
@@ -174,7 +168,8 @@
 
 <script>
 export default {
-  name: 'Book',
+
+  name: 'Bookshelf',
   watch: {
     filterText (val) {
       this.$refs.tree.filter(val)
@@ -182,63 +177,16 @@ export default {
   },
   data () {
     return {
-      tableData: [{
-        date: '2016-05-02',
-        name: 'Book1',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }],
+      tableData: [],
+      treeId: '',
       filterText: '',
-      data: [{
-        id: 1,
-        label: 'Level one 1',
-        children: [{
-          id: 4,
-          label: 'Level two 1-1',
-          children: [{
-            id: 9,
-            label: 'Level three 1-1-1'
-          }, {
-            id: 10,
-            label: 'Level three 1-1-2'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: 'Level one 2',
-        children: [{
-          id: 5,
-          label: 'Level two 2-1'
-        }, {
-          id: 6,
-          label: 'Level two 2-2'
-        }]
-      }, {
-        id: 3,
-        label: 'Level one 3',
-        children: [{
-          id: 7,
-          label: 'Level two 3-1'
-        }, {
-          id: 8,
-          label: 'Level two 3-2'
-        }]
-      }],
+      data: [],
       defaultProps: {
         children: 'children',
         label: 'label'
       },
+      options: [],
+      value: '',
       searchForm: {},
       delBtlStatue: true,
       total: 0,
@@ -247,40 +195,55 @@ export default {
       dialogVisible: false,
       editForm: {},
       editFormRules: {
-        name: [
+        bookName: [
           {
             required: true,
-            message: 'please input name',
+            message: 'please input a book name',
             trigger: 'blur'
           }
         ],
-        code: [
+        bookPages: [
           {
             required: true,
-            message: 'please input only code',
+            message: 'please input the number of book pages',
+            trigger: 'blur'
+          },
+          {
+            type: 'number',
+            message: 'must be number'
+          }
+        ],
+        bookPrice: [
+          {
+            type: 'number',
+            message: 'must be number'
+          },
+          {
+            required: true,
+            message: 'please input the price of book pages',
             trigger: 'blur'
           }
         ],
-        status: [
+        bookAuthor: [
           {
             required: true,
-            message: 'please select status',
+            message: 'please input an author',
             trigger: 'blur'
           }
         ]
       },
 
-      multipleSelection: [],
-
-      permDialogVisible: false,
-      permForm: {},
-      permTreeData: []
+      multipleSelection: []
     }
   },
   methods: {
     filterNode (value, data) {
       if (!value) return true
       return data.label.indexOf(value) !== -1
+    },
+    handleNodeClick (data) {
+      this.treeId = data.id
+      this.getBookshelfList(null, this.treeId)
     },
     toggleSelection (rows) {
       if (rows) {
@@ -293,21 +256,24 @@ export default {
     },
     handleSelectionChange (val) {
       this.multipleSelection = val
-
       this.delBtlStatu = val.length === 0
     },
-
     handleSizeChange (val) {
       console.log(`${val} in page`)
       this.size = val
-      this.getRoleList()
+      this.getBookshelfList()
     },
     handleCurrentChange (val) {
       console.log(`current page: ${val}`)
       this.current = val
-      this.getRoleList()
+      this.getBookshelfList()
     },
-
+    clickInsertButton () {
+      this.dialogVisible = true
+      this.$axios.get('/library/bookshelf/options/').then(res => {
+        this.options = res.data.data
+      })
+    },
     resetForm (formName) {
       if (this.$refs[formName] !== undefined) {
         this.$refs[formName].resetFields()
@@ -318,33 +284,42 @@ export default {
     handleClose () {
       this.resetForm('editForm')
     },
-
-    getRoleList () {
-      this.$axios.get('/sys/role/list', {
+    getBookshelfList (search, tree) {
+      if (search) {
+        this.treeId = ''
+      }
+      if (tree) {
+        this.searchForm.bookName = ''
+      }
+      this.$axios.get('/library/book/list', {
         params: {
-          name: this.searchForm.name,
+          treeId: this.treeId,
+          code: this.searchForm.bookName,
           current: this.current,
           size: this.size
         }
       }).then(res => {
-        this.tableData = res.data.data
-        this.size = res.data.data.size
-        this.current = res.data.data.current
-        this.total = res.data.data.total
+        this.tableData = res.data.data.content
+        this.size = res.data.data.pageable.pageSize
+        this.current = res.data.data.pageable.pageNumber + 1
+        this.total = res.data.data.totalElements
       })
     },
-
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$axios.post('/sys/role/' + (this.editForm.id ? 'update' : 'save'), this.editForm)
+          this.$axios.post('/library/book/' + (this.editForm.id ? 'update' : 'save'), this.editForm, {
+            params: {
+              bookshelfId: this.value
+            }
+          })
             .then(res => {
               this.$message({
                 showClose: true,
                 message: 'success',
                 type: 'success',
                 onClose: () => {
-                  this.getRoleList()
+                  this.getBookshelfList()
                 }
               })
 
@@ -358,15 +333,17 @@ export default {
       })
     },
     editHandle (id) {
-      this.$axios.get('/sys/role/info/' + id).then(res => {
+      this.$axios.get('/library/book/info/' + id).then(res => {
         this.editForm = res.data.data
-
+        this.value = res.data.data.bookshelf.id
         this.dialogVisible = true
+      })
+      this.$axios.get('/library/bookshelf/options/').then(res => {
+        this.options = res.data.data
       })
     },
     delHandle (id) {
       var ids = []
-
       if (id) {
         ids.push(id)
       } else {
@@ -374,49 +351,27 @@ export default {
           ids.push(row.id)
         })
       }
-
-      console.log(ids)
-
-      this.$axios.post('/sys/role/delete', ids).then(res => {
+      this.$axios.post('/library/book/delete', ids).then(res => {
         this.$message({
           showClose: true,
           message: 'success',
           type: 'success',
           onClose: () => {
-            this.getRoleList()
+            this.getBookshelfList()
           }
         })
       })
     },
-    permHandle (id) {
-      this.permDialogVisible = true
-
-      this.$axios.get('/sys/role/info/' + id).then(res => {
-        this.$refs.permTree.setCheckedKeys(res.data.data.menuIds)
-        this.permForm = res.data.data
-      })
-    },
-
-    submitPermFormHandle (formName) {
-      var menuIds = this.$refs.permTree.getCheckedKeys()
-
-      console.log(menuIds)
-
-      this.$axios.post('/sys/role/perm/' + this.permForm.id, menuIds).then(res => {
-        this.$message({
-          showClose: true,
-          message: 'success',
-          type: 'success',
-          onClose: () => {
-            this.getRoleList()
-          }
-        })
-        this.permDialogVisible = false
-        this.resetForm(formName)
+    getRoomTree () {
+      this.$axios.get('/library/bookshelf/tree').then(res => {
+        this.data = res.data.data
       })
     }
+  },
+  created () {
+    this.getRoomTree()
+    this.getBookshelfList()
   }
-
 }
 </script>
 

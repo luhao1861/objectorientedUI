@@ -6,9 +6,7 @@
       <h3>Course #586 Author-Hao Lu </h3>
     </el-col>
     <el-col :span="1">
-
       <el-divider direction="vertical"></el-divider>
-
     </el-col>
     <el-col :span="6" :xl="6" :lg="7">
       <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="100px" class="demo-ruleForm">
@@ -23,12 +21,33 @@
           <!--captchaImg should not in loginForm-->
           <el-image :src="captchaImg" class="captchaImg" style="width: 120px" @click="getCaptchaImg()"></el-image>
         </el-form-item>
+<!--        <el-form-item style="width: 400px">-->
+<!--          <el-button type="primary" @click="submitForm('loginForm')" style="float: left">Sign In</el-button>-->
+<!--          <el-button @click="resetForm('loginForm')" style="float: left">Reset</el-button>-->
+<!--        </el-form-item>-->
         <el-form-item style="width: 400px">
           <el-button type="primary" @click="submitForm('loginForm')" style="float: left">Sign In</el-button>
-          <el-button @click="resetForm('loginForm')" style="float: left">Reset</el-button>
+          <el-button @click="dialogFormVisible = true" style="float: left">Sign Up</el-button>
         </el-form-item>
       </el-form>
     </el-col>
+    <el-dialog title="Sign Up" :visible.sync="dialogFormVisible" width="600px">
+      <el-form :model="signUpForm">
+        <el-form-item label="username" :label-width="formLabelWidth">
+          <el-input v-model="signUpForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="password" :label-width="formLabelWidth">
+          <el-input type="password" v-model="signUpForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="E-mail" :label-width="formLabelWidth">
+          <el-input  v-model="signUpForm.email" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="signUp()">Confirm</el-button>
+      </div>
+    </el-dialog>
   </el-row>
 </template>
 
@@ -38,12 +57,19 @@ export default {
   name: 'Login',
   data () {
     return {
+      dialogFormVisible: false,
       captchaImg: null,
       loginForm: {
         username: '',
         password: '',
         code: '',
         token: ''
+      },
+      formLabelWidth: '120px',
+      signUpForm: {
+        username: '',
+        password: '',
+        email: ''
       },
       rules: {
         username: [
@@ -99,13 +125,28 @@ export default {
             this.$router.push('/index')
           })
         } else {
-          console.log('error submit!!')
+          this.$message.error('error submit!!')
           return false
         }
       })
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()
+    },
+    signUp () {
+      alert(this.signUpForm.username)
+      this.$axios.post('/sys/user/signup', this.signUpForm, {
+        params: {
+          username: this.signUpForm.username,
+          password: this.signUpForm.password,
+          email: this.signUpForm.email
+        }
+      }).then(res => {
+        this.$message.success('Sign up success')
+        this.loginForm.username = res.data.data.username
+        this.loginForm.password = res.data.data.password
+      })
+      this.dialogFormVisible = false
     },
     getCaptchaImg () {
       this.$axios.get('/captcha').then(res => {

@@ -18,7 +18,7 @@
         <el-button type="primary" @click="dialogVisible = true" v-if="hasAuth('sys:user:save')">Insert</el-button>
       </el-form-item>
       <el-form-item>
-        <el-popconfirm title="这是确定批量删除吗？" @confirm="delHandle(null)">
+        <el-popconfirm title="Do you confirm delete?" @confirm="delHandle(null)">
           <el-button type="danger" slot="reference" :disabled="delBtlStatus" v-if="hasAuth('sys:user:delete')">Multi-del</el-button>
         </el-popconfirm>
       </el-form-item>
@@ -53,7 +53,7 @@
       </el-table-column>
       <el-table-column
         prop="code"
-        label="角色名称">
+        label="Role Name">
         <template slot-scope="scope">
           <el-tag size="small" type="info" v-for="item in scope.row.roles" :key="item.id">{{item.name}}</el-tag>
         </template>
@@ -70,37 +70,39 @@
 
       <el-table-column
         prop="status"
-        label="状态">
+        label="Status"
+        width="160"
+      >
         <template slot-scope="scope">
-          <el-tag size="small" v-if="scope.row.status === 1" type="success">正常</el-tag>
-          <el-tag size="small" v-else-if="scope.row.status === 0" type="danger">禁用</el-tag>
+          <el-tag size="small" v-if="scope.row.status === 1" type="success">Enable</el-tag>
+          <el-tag size="small" v-else-if="scope.row.status === 0" type="danger">Disable</el-tag>
         </template>
 
       </el-table-column>
       <el-table-column
         prop="created"
-        width="200"
-        label="创建时间"
+        width="160"
+        label="Created Date"
       >
       </el-table-column>
       <el-table-column
         prop="icon"
-        width="260px"
-        label="操作">
+        width="360px"
+        label="Operation">
 
         <template slot-scope="scope">
-          <el-button type="text" @click="roleHandle(scope.row.id)">分配角色</el-button>
+          <el-button type="text" @click="roleHandle(scope.row.id)">Assign Role</el-button>
           <el-divider direction="vertical"></el-divider>
 
-          <el-button type="text" @click="repassHandle(scope.row.id, scope.row.username)">重置密码</el-button>
+          <el-button type="text" @click="repassHandle(scope.row.id, scope.row.username)">Reset Password</el-button>
           <el-divider direction="vertical"></el-divider>
 
-          <el-button type="text" @click="editHandle(scope.row.id)">编辑</el-button>
+          <el-button type="text" @click="editHandle(scope.row.id)">Edit</el-button>
           <el-divider direction="vertical"></el-divider>
 
           <template>
-            <el-popconfirm title="这是一段内容确定删除吗？" @confirm="delHandle(scope.row.id)">
-              <el-button type="text" slot="reference">删除</el-button>
+            <el-popconfirm title="Do you confirm delete?" @confirm="delHandle(scope.row.id)">
+              <el-button type="text" slot="reference">Delete</el-button>
             </el-popconfirm>
           </template>
 
@@ -119,47 +121,46 @@
       :total="total">
     </el-pagination>
 
-    <!--新增对话框-->
     <el-dialog
-      title="提示"
+      title="Tip"
       :visible.sync="dialogVisible"
       width="600px"
       :before-close="handleClose">
 
       <el-form :model="editForm" :rules="editFormRules" ref="editForm">
-        <el-form-item label="用户名" prop="username" label-width="100px">
+        <el-form-item label="Username" prop="username" label-width="100px">
           <el-input v-model="editForm.username" autocomplete="off"></el-input>
           <el-alert
-            title="初始密码为888888"
+            title="default password 123456"
             :closable="false"
             type="info"
             style="line-height: 12px;"
           ></el-alert>
         </el-form-item>
 
-        <el-form-item label="邮箱"  prop="email" label-width="100px">
+        <el-form-item label="E-mail"  prop="email" label-width="100px">
           <el-input v-model="editForm.email" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="手机号"  prop="phone" label-width="100px">
+        <el-form-item label="Phone"  prop="phone" label-width="100px">
           <el-input v-model="editForm.phone" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="状态"  prop="status" label-width="100px">
+        <el-form-item label="Status"  prop="status" label-width="100px">
           <el-radio-group v-model="editForm.status">
-            <el-radio :label="0">禁用</el-radio>
-            <el-radio :label="1">正常</el-radio>
+            <el-radio :label="0">Disable</el-radio>
+            <el-radio :label="1">Enable</el-radio>
           </el-radio-group>
         </el-form-item>
 
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="resetForm('editForm')">取 消</el-button>
-        <el-button type="primary" @click="submitForm('editForm')">确 定</el-button>
+        <el-button @click="resetForm('editForm')">Cancel</el-button>
+        <el-button type="primary" @click="submitForm('editForm')">Confirm</el-button>
       </div>
     </el-dialog>
 
     <!-- 分配权限对话框 -->
-    <el-dialog title="分配角色" :visible.sync="roleDialogFormVisible" width="600px">
+    <el-dialog title="Assign Roles" :visible.sync="roleDialogFormVisible" width="600px">
 
       <el-form :model="roleForm">
         <el-tree
@@ -332,7 +333,7 @@ export default {
       this.$axios.post('/sys/user/delete', ids).then(res => {
         this.$message({
           showClose: true,
-          message: '恭喜你，操作成功',
+          message: 'success',
           type: 'success',
           onClose: () => {
             this.getUserList()
@@ -361,7 +362,7 @@ export default {
       this.$axios.post('/sys/user/role/' + this.roleForm.id, roleIds).then(res => {
         this.$message({
           showClose: true,
-          message: '恭喜你，操作成功',
+          message: 'success',
           type: 'success',
           onClose: () => {
             this.getUserList()
@@ -372,15 +373,15 @@ export default {
       })
     },
     repassHandle (id, username) {
-      this.$confirm('将重置用户【' + username + '】的密码, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm('Reset【' + username + '】password to 123456, confirm?', 'Tip', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
         this.$axios.post('/sys/user/repass', id).then(res => {
           this.$message({
             showClose: true,
-            message: '恭喜你，操作成功',
+            message: 'success',
             type: 'success',
             onClose: () => {
             }

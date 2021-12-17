@@ -58,8 +58,8 @@
         prop="status"
         label="status">
         <template slot-scope="scope">
-          <el-tag size="small" v-if="scope.row.status === 1" type="success">正常</el-tag>
-          <el-tag size="small" v-else-if="scope.row.status === 0" type="danger">禁用</el-tag>
+          <el-tag size="small" v-if="scope.row.status === 1" type="success">Enable</el-tag>
+          <el-tag size="small" v-else-if="scope.row.status === 0" type="danger">Disable</el-tag>
         </template>
 
       </el-table-column>

@@ -124,7 +124,7 @@
             </el-form-item>
 
             <el-form-item label="Capacity" prop="bookshelfCapacity" label-width="100px">
-              <el-input v-model="editForm.bookshelfCapacity" autocomplete="off" style="width: 400px"></el-input>
+              <el-input v-model.number="editForm.bookshelfCapacity" autocomplete="off" style="width: 400px"></el-input>
             </el-form-item>
 
             <el-form-item label="Color" prop="bookshelfColor" label-width="100px">
@@ -132,7 +132,7 @@
             </el-form-item>
 
             <el-form-item label="Layers" prop="bookshelfLayers" label-width="100px">
-              <el-input v-model="editForm.bookshelfLayers" autocomplete="off" style="width: 400px"></el-input>
+              <el-input v-model.number="editForm.bookshelfLayers" autocomplete="off" style="width: 400px"></el-input>
             </el-form-item>
 
             <el-form-item label="Room" prop="room" label-width="100px">
@@ -187,25 +187,40 @@ export default {
       dialogVisible: false,
       editForm: {},
       editFormRules: {
-        name: [
+        bookshelfCode: [
           {
             required: true,
             message: 'please input name',
             trigger: 'blur'
           }
         ],
-        code: [
+        bookshelfCapacity: [
           {
             required: true,
-            message: 'please input only code',
+            message: 'please input the number of bookshelf capacity',
+            trigger: 'blur'
+          },
+          {
+            type: 'number',
+            message: 'must be number'
+          }
+        ],
+        bookshelfColor: [
+          {
+            required: true,
+            message: 'please input bookshelf color',
             trigger: 'blur'
           }
         ],
-        status: [
+        bookshelfLayers: [
           {
             required: true,
-            message: 'please select status',
+            message: 'please input the number of bookshelf layers',
             trigger: 'blur'
+          },
+          {
+            type: 'number',
+            message: 'must be number'
           }
         ]
       },
