@@ -116,7 +116,7 @@
         </el-pagination>
 
         <el-dialog
-          title="Notification"
+          title="Book Info"
           :visible.sync="dialogVisible"
           width="600px"
           :before-close="handleClose">
